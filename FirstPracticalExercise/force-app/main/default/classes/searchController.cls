@@ -19,15 +19,15 @@ public with sharing class searchController {
         ct = Database.query(searchQuery);
     } 
    
-    public void setAsPrimary(){
-        
-        for (Contact c : ct) {
-            if (c.Is_Primary_Contact__c == false){
-            
-                c.Is_Primary_Contact__c = true;
-      		 }   
-   		}    
-    }
+  //  public void setAsPrimary(){
+  //      
+  //      for (Contact c : ct) {
+  //          if (c.Is_Primary_Contact__c == false){
+  //          
+  //              c.Is_Primary_Contact__c = true;
+  //    		 }   
+  // 		}    
+  //  }
    
     public Contact cc {get;set;}
        
