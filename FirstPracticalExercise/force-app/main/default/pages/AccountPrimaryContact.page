@@ -1,0 +1,45 @@
+<apex:page sidebar="false" standardController="Account" extensions="searchController">
+    <apex:form >
+    <apex:pageBlock title="Account Primary Contact" mode="edit">
+        <apex:pageBlockSection columns="2">
+            <apex:inputField label="Account Name" value="{!Account.Name}"/>
+            <apex:inputField label="Account Number" value="{!Account.AccountNumber}"/>
+            <apex:inputField label="Type" value="{!Account.Type}"/>
+            <apex:inputField label="Active" value="{!Account.Active__c}"/>
+            <apex:inputField label="Phone" value="{!Account.Phone}"/> 
+            <apex:inputField label="Fax" value="{!Account.Fax}"/>
+        </apex:pageBlockSection>
+        <apex:pageBlockButtons >
+            <apex:commandButton action="{!save}" value="Save"/>
+            <apex:commandButton action="{!cancel}" value="Cancel"/>
+        </apex:pageBlockButtons>  
+    </apex:pageBlock>
+  
+        <apex:pageBlock title="Search related contacts">
+            <apex:inputText value="{!searchKey}" label="Input"/>
+        	<apex:commandButton value="Search" action="{!search}"/>
+        </apex:pageBlock>
+        
+        <apex:pageBlock title="Related Contacts" id="contacts_list">
+            <apex:pageBlockTable value="{!ct}" var="c">  
+                <apex:column headerValue="Name" value="{!c.Name}"/>
+                <apex:column headerValue="Title" value="{!c.Title}"/>
+                <apex:column headerValue="Phone" value="{!c.Phone}"/>
+                <apex:column headerValue="Is Primary Contact" value="{!c.Is_Primary_Contact__c}"/>
+                <apex:column >
+                 <!--
+                    <apex:commandLink action="{!SetPrimaryContact}" onclick="return confirm('Are you sure you want to set this contact as primary?');" value="Set as Primary" oncomplete="primaryContact('{!Contact_Id}');" reRender="pageid"/>
+                  -->  
+					<apex:commandLink rendered="{!c.Is_Primary_Contact__c == false}" onclick="return confirm('Are you sure you want to set this contact as primary?');" action="{!SetPrimary}" value="Set as Primary" rerender="contacts_list">
+                    	<apex:param name="newPrimaryContactId" value="{!c.Id}" assignTo="{!newPrimaryContactId}"/>
+                    </apex:commandLink>
+                
+<!--
+					<apex:actionFunction name='SetContactAsPrimary' action="{!setPrimary}" oncomplete=""/>
+ -->		
+				</apex:column>   
+            </apex:pageBlockTable>    
+        </apex:pageBlock>
+
+    </apex:form>
+</apex:page>
