@@ -1,36 +1,41 @@
 public class updatePrimaryContactPhone implements Database.Batchable<SObject>, Database.Stateful {
-	private Id accountId;
-    private String primaryContactPhone;
+	public Contact primaryContact;
+	//Get the primary contact and set to the state object
+	public updatePrimaryContactPhone(Id accountId) {
+		List<Contact> primaryContacts = [SELECT Id, Phone, AccountId
+		                                 FROM Contact
+		                                 WHERE AccountId = :accountId AND Is_Primary_Contact__c = true
+		                                 LIMIT 1];
+		if (primaryContacts != null && primaryContacts.size() > 0) {
+			this.primaryContact = primaryContacts[0];
+		}
+	}
 
-    public updatePrimaryContactPhone(Id accountId) {
-        this.accountId = accountId;
-    }
+	
+	public Database.QueryLocator start(Database.BatchableContext bc) {
+		String Query = 'SELECT Id FROM Contact WHERE AccountId = primaryContact.AccountId AND Id != primaryContact.Id';
+		Query = Query + ' LIMIT 0';
+		try {
+				return Database.getQueryLocator(Query);
+				
+		} catch (Exception e) {
+			System.debug('Exception' + e.getMessage());
+			return null;
+		}
+	}
 
-    public Database.QueryLocator start(Database.BatchableContext bc) {
-        // collect the batches of records or objects to be passed to execute
-        List<Contact> primaryContacts = [select Id, Phone from Contact where AccountId = :accountId and Is_Primary_Contact__c = true LIMIT 1];
-        if(!primaryContacts.IsEmpty()) {
-            primaryContactPhone = primaryContacts[0].Phone;
-        }
+	public void execute(Database.BatchableContext bc, List<Contact> scope) {
+		try {
+			for (Contact c : scope){
+				c.Primary_Contact_Phone__c = primaryContact.Phone;
+			}
+			update scope;
+		} catch (Exception e) {
+			System.debug('Exception' + e.getMessage());
+		}
+	}
 
-        return Database.getQueryLocator('select Id, Is_Primary_Contact__c, Primary_Contact_Phone__c from Contact where AccountId = \'' + accountId + '\'');
-    }
-
-    public void execute(Database.BatchableContext bc, List<Contact> scope){
-        
-        try {
-            // process each batch of records
-            for(Contact c : scope) {
-                c.Primary_Contact_Phone__c = primaryContactPhone;
-            }
-
-            update scope;
-        } catch (Exception e){
-            System.debug('Exception' + e.getMessage());
-        }
-    }
-
-    public void finish(Database.BatchableContext bc){
-        // execute any post-processing operations
-    }
+	public void finish(Database.BatchableContext bc) {
+	
+	}
 }

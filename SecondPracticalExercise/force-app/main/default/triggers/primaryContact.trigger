@@ -3,41 +3,41 @@ trigger primaryContact on Contact (before insert, before update, after insert, a
 		if (Trigger.isBefore) {
 		
 			Set<Id> accountIds = new Set<Id>();
-			for (Contact contact : Trigger.New) {
+			for (Contact c : Trigger.New) {
 				
-				Boolean isPrimaryContactSet = Trigger.isUpdate ? contact.Is_Primary_Contact__c && !Trigger.oldMap.get(contact.Id).Is_Primary_Contact__c : contact.Is_Primary_Contact__c;
+				Boolean isPrimaryContactSet = Trigger.isUpdate ? C.Is_Primary_Contact__c && !Trigger.oldMap.get(c.Id).Is_Primary_Contact__c : c.Is_Primary_Contact__c;
 				if (isPrimaryContactSet){
-					accountIds.add(contact.AccountId);
+					accountIds.add(c.AccountId);
 				}
 			}
 		
 			if (!accountIds.isEmpty()) {
 				List<Contact> primaryContacts = [SELECT Id, AccountId
 				                                 FROM Contact
-				                                 WHERE Is_Primary_Contact__c = true and AccountId IN :accountIds];
+				                                 WHERE Is_Primary_Contact__c = true AND AccountId IN :accountIds];
 
 				Map<Id, List<Contact>> contactsMap = new Map<Id, List<Contact>>();
 			
-				for (Contact contact : primaryContacts) {
-					if (!contactsMap.containsKey(contact.AccountId)){
-						contactsMap.put(contact.AccountId, new List<Contact>());
+				for (Contact c : primaryContacts) {
+					if (!contactsMap.containsKey(C.AccountId)){
+						contactsMap.put(C.AccountId, new List<Contact>());
 					}
-					contactsMap.get(contact.AccountId).add(contact);
+					contactsMap.get(c.AccountId).add(c);
 				}
 
-				for (Contact contact : Trigger.New) {
-					List<Contact> contacts = contactsMap.get(contact.AccountId);
-					if (contacts != null && contacts.size() > 0){
-						Trigger.newMap.get(contact.Id).addError('Cannot set primary contact since account already has one');
+				for (Contact c : Trigger.New) {
+					List<Contact> contactsList = contactsMap.get(c.AccountId);
+					if (contactsList != null && contactsList.size() > 0){
+						Trigger.newMap.get(c.Id).addError('There is primary contact that already exist.');
 					}
 				}
 			}
 		} else {
-			for (Contact contact : Trigger.New) {
-				if (contact.Is_Primary_Contact__c) {
-					Contact oldContact = Trigger.isUpdate ? Trigger.oldMap.get(contact.Id) : null;
+			for (Contact c : Trigger.New) {
+				if (c.Is_Primary_Contact__c) {
+					Contact oldContact = Trigger.isUpdate ? Trigger.oldMap.get(c.Id) : null;
 					if (Trigger.isInsert || Trigger.isUpdate && oldContact != null && !oldContact.Is_Primary_Contact__c) {
-						updatePrimaryContactPhone batchInstance = new updatePrimaryContactPhone(contact.AccountId);
+						updatePrimaryContactPhone batchInstance = new updatePrimaryContactPhone(c.AccountId);
 						Id batchId = Database.executeBatch(batchInstance);
 					}
 				}
