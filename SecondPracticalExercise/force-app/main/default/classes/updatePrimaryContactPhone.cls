@@ -17,7 +17,7 @@ public class updatePrimaryContactPhone implements Database.Batchable<SObject>, D
 		try {
 				//return Database.getQueryLocator(Query);
 				return Database.getQueryLocator('SELECT ID FROM Contact ' + 
-											'Where AccountId = \'' + PrimaryContact.AccountId + '\' and Id != \'' + PrimaryContact.Id + '\'');
+											'Where AccountId = \'' + primaryContact.AccountId + '\' and Id != \'' + primaryContact.Id + '\'');
 		} catch (Exception e) {
 			System.debug('Exception' + e.getMessage());
 			return null;
@@ -27,7 +27,7 @@ public class updatePrimaryContactPhone implements Database.Batchable<SObject>, D
 	public void execute(Database.BatchableContext bc, List<Contact> scope){
 		try {
 			for (Contact contact : scope){
-				contact.Primary_Contact_Phone__c = PrimaryContact.Phone;
+				contact.Primary_Contact_Phone__c = primaryContact.Phone;
 			}
 			update scope;
 		} catch (Exception e) {
