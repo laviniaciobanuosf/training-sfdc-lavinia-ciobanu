@@ -5,7 +5,7 @@ trigger primaryContact on Contact (before insert, before update, after insert, a
 			Set<Id> accountIds = new Set<Id>();
 			for (Contact c : Trigger.New) {
 				
-				Boolean isPrimaryContactSet = Trigger.isUpdate ? C.Is_Primary_Contact__c && !Trigger.oldMap.get(c.Id).Is_Primary_Contact__c : c.Is_Primary_Contact__c;
+				Boolean isPrimaryContactSet = Trigger.isUpdate ? c.Is_Primary_Contact__c && !Trigger.oldMap.get(c.Id).Is_Primary_Contact__c : c.Is_Primary_Contact__c;
 				if (isPrimaryContactSet){
 					accountIds.add(c.AccountId);
 				}

@@ -14,7 +14,6 @@ public class updatePrimaryContactPhone implements Database.Batchable<SObject>, D
 	
 	public Database.QueryLocator start(Database.BatchableContext bc) {
 		String Query = 'SELECT Id FROM Contact WHERE AccountId = primaryContact.AccountId AND Id != primaryContact.Id';
-		Query = Query + ' LIMIT 0';
 		try {
 				return Database.getQueryLocator(Query);
 				
