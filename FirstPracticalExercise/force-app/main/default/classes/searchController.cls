@@ -1,7 +1,7 @@
 public with sharing class searchController {
 
     private Account a;
-    private List<Contact> contactsList {get;set;};
+    private List<Contact> contactsList;
     private Id primaryId;
     private String accountId = ApexPages.currentPage().getParameters().get('a');
     private Boolean refreshPage {get; set;} 
