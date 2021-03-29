@@ -30,7 +30,7 @@
                  <!--
                     <apex:commandLink action="{!SetPrimaryContact}" onclick="return confirm('Are you sure you want to set this contact as primary?');" value="Set as Primary" oncomplete="primaryContact('{!Contact_Id}');" reRender="pageid"/>
                   -->  
-					<apex:commandLink rendered="{!c.Is_Primary_Contact__c == false}" onclick="return confirm('Are you sure you want to set this contact as primary?');" action="{!SetPrimary}" value="Set as Primary" rerender="contacts_list">
+					<apex:commandLink rendered="{!c.Is_Primary_Contact__c == false}" onclick="return confirm('Are you sure you want to set this contact as primary?');" action="{!setPrimaryContact}" value="Set as Primary" rerender="contacts_list">
                     	<apex:param name="newPrimaryContactId" value="{!c.Id}" assignTo="{!newPrimaryContactId}"/>
                     </apex:commandLink>
                 

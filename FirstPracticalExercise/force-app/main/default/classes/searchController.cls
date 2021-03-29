@@ -48,4 +48,20 @@ public with sharing class searchController {
         update contactToSetPrimary;
         return null;  
     }
+
+    public PageReference setPrimaryContact() {
+        refreshPage = false;
+        List<Contact> primaryContacts = [SELECT Id, Is_Primary_Contact__c FROM Contact WHERE AccountId = :accountId AND Is_Primary_Contact__c = true];
+            for(Contact primaryContact : primaryContacts) {
+                primaryContact.Is_Primary_Contact__c = false;
+            }
+            update primaryContacts;
+            
+            Contact c = [SELECT Id, Is_Primary_Contact__c FROM Contact WHERE Id = :primaryId];
+            c.Is_Primary_Contact__c = true;
+            update c;
+            
+            refreshPage=true;
+        
+    }
 }
