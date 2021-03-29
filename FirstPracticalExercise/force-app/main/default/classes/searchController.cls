@@ -50,6 +50,11 @@ public with sharing class searchController {
       //   a = (Account)controller.getRecord();  
 
     }
+    
+    public void search() {
+        String searchQuery = 'SELECT Name, Title, Phone, Is_Primary_Contact__c FROM Contact WHERE Name Like \'%' + searchKey + '%\'';
+        ct = Database.query(searchQuery);
+    } 
 
     public List<Contact> getContacts() {
         try {

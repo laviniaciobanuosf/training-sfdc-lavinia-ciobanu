@@ -19,6 +19,7 @@
     <apex:pageBlock title="Search related contacts">
         <apex:form>
             <apex:inputText value="{!searchKey}" label="Input"/>
+            <apex:commandButton value="Search" action="{!search}"/>
             <apex:commandButton reRender="myPanel,myButtons" value="Search"/>
         </apex:form>
     </apex:pageBlock>
@@ -43,7 +44,7 @@
         </apex:form>
         <apex:pageBlockTable value="{!ct}" var="c" rendered="{!refreshPage}">  
             <apex:column headerValue="Name" value="{!c.Name}">
-                <apex:facet name="footer"> Showing Page # {!pageNumber} of {!totalPages}
+                <apex:facet name="footer"> {!pageNumber} of {!totalPages}
                 </apex:facet>
             </apex:column>
             <apex:column headerValue="Title" value="{!c.Title}"/>
