@@ -41,31 +41,33 @@ public with sharing class searchController {
                          WHERE AccountId = :accountId];
             a = [SELECT id, Name, Phone, Fax, Type, AccountNumber, Active__c
                  FROM Account
-                 WHERE id = :accountId];
+                 WHERE Id = :accountId];
         } catch (Exception e){
             System.debug('Exception ' + e.getMessage());
         }
 
         refreshPage=true;
-      //   a = (Account)controller.getRecord();  
+        // a = getAccount();
+        // a = (Account)sc.getRecord();  
 
     }
     
     public void search() {
-        String searchQuery = 'SELECT Name, Title, Phone, Is_Primary_Contact__c FROM Contact WHERE Name Like \'%' + searchKey + '%\' LIMIT 200';
+        String searchQuery = 'SELECT Name, Title, Phone, Is_Primary_Contact__c FROM Contact WHERE Name Like \'%' + searchKey + '%\' ORDER BY Id LIMIT ' + listSize + 'OFFSET ' + counter;
         ct = Database.query(searchQuery);
     } 
+    
 
     public List<Contact> getContacts() {
         try {
             String searchTerm = '%' + searchKey + '%';
             contactsList = [SELECT Id, Name, Title, Phone, Is_Primary_Contact__c
-                        FROM Contact 
-                        WHERE AccountId = :accountId
-                        AND Name like :searchTerm
-                        ORDER BY Id 
-                        LIMIT :listSize 
-                        OFFSET :counter];
+                            FROM Contact 
+                            WHERE AccountId = :accountId
+                            AND Name like :searchTerm
+                            ORDER BY Id 
+                            LIMIT :listSize 
+                            OFFSET :counter];
         	refreshPage=true;
             return contactsList;
             
@@ -94,7 +96,7 @@ public with sharing class searchController {
             System.debug('Exception' + e.getMessage());
         }
             return null;      
-    } 
+    }   
 
     public PageReference Previous() { 
         counter -= listSize;
