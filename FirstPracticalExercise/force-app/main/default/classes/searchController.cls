@@ -22,22 +22,14 @@ public with sharing class searchController {
     public searchController(ApexPages.StandardController controller){
         stdCtrl=controller;
         Account a = (Account)controller.getRecord();  
-        // newPrimaryContactId='';
-    
     }
     
     public void search() {
         String searchQuery = 'SELECT Name, Title, Phone, Is_Primary_Contact__c FROM Contact WHERE Name Like \'%'+searchKey+'%\' Limit 50';
         contactsList = Database.query(searchQuery);
     } 
-   
- //   public Contact cc {get;set;}
-       
-  //  public Id newPrimaryContactId {get;set;}
-  
 
-
-    public PageReference setPrimaryContact() {
+    public PageReference setAsPrimary() {
         refreshPage = false;
         List<Contact> primaryContacts = [SELECT Id, Is_Primary_Contact__c FROM Contact WHERE AccountId = :accountId AND Is_Primary_Contact__c = true];
             for(Contact primaryContact : primaryContacts) {

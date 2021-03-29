@@ -34,7 +34,7 @@
                 <apex:column headerValue="Title" value="{!c.Title}"/>
                 <apex:column headerValue="Phone" value="{!c.Phone}"/>
                 <apex:column headerValue="Is Primary Contact" value="{!c.Is_Primary_Contact__c}"/>
-                <apex:column title = "Action">
+                <apex:column>
                 <apex: outpulLink rendered="{!IF(c.Is_Primary_Contact__c == false, true, false)}" onclick="if(confirm('Are you sure you want to set this contact as primary?')) {setPrimaryContact('{c.Id}'); return false;}">Set as Primary</apex:outpulLink> 
             
 				</apex:column>   
