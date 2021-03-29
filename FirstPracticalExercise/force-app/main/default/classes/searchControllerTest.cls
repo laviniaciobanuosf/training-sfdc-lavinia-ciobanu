@@ -77,11 +77,6 @@ private class searchControllerTest {
         Boolean refreshPage = controller.getRefreshPage();
         System.assertEquals(true, refreshPage);
 
-        Account a1 = controller.getAccount();
-        controller.cancel();
-        Account a2 = controller.getAccount();
-        System.assertEquals(a1, a2);
-
         Test.stopTest();
     }
 }

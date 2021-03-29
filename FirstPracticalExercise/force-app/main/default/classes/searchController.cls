@@ -94,26 +94,7 @@ public with sharing class searchController {
             System.debug('Exception' + e.getMessage());
         }
             return null;      
-    }
-
-    public void save() {
-        try {
-            update a;
-        } catch(DmlException e) {
-            System.debug('Exception' + e);
-            ApexPages.addMessages(e);
-        }
-    }
-
-    public void cancel() {
-        try {
-            a = [SELECT id, Name, Phone, Fax, Type, AccountNumber, Active__c
-                    FROM Account
-                    WHERE id = :accountId];
-        } catch (Exception e){
-            System.debug('Exception' + e);
-        }
-    }   
+    } 
 
     public PageReference Previous() { 
         counter -= listSize;
