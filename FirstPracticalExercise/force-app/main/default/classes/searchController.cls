@@ -31,6 +31,7 @@ public with sharing class searchController {
 
     public PageReference setAsPrimary() {
         refreshPage = false;
+        try {
         List<Contact> primaryContacts = [SELECT Id, Is_Primary_Contact__c FROM Contact WHERE AccountId = :accountId AND Is_Primary_Contact__c = true];
             for(Contact primaryContact : primaryContacts) {
                 primaryContact.Is_Primary_Contact__c = false;
@@ -42,6 +43,9 @@ public with sharing class searchController {
             update c;
             
             refreshPage=true;
+        } catch (Exception e) {
+            System.debug('Exception' + e.getMessage());
+        }
             return null;
         
     }
