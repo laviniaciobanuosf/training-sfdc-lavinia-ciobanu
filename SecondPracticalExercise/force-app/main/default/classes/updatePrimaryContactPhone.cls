@@ -23,14 +23,9 @@ public class updatePrimaryContactPhone implements Database.Batchable<SObject>, D
 		if (!primaryContacts.isEmpty()) {
 			primaryContactPhone = primaryContacts[0].Phone;
 		}
-		String Query = 'SELECT Id FROM Contact WHERE AccountId = primaryContact.AccountId AND Id != primaryContact.Id';
-	//	try {
-				return Database.getQueryLocator(Query);
-				
-	//	} catch (Exception e) {
-	//		System.debug('Exception' + e.getMessage());
-	//		return null;
-	//	}
+	
+		return Database.getQueryLocator('SELECT IS FROM Contact ' + 
+										'WHERE AccountId = \'' + PrimaryContact.AccountId + '\' AND Id != \'' + PrimaryContact.Id + '\'');					
 	}
 
 	public void execute(Database.BatchableContext bc, List<Contact> scope) {
