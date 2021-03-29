@@ -15,13 +15,13 @@
             </apex:pageBlockButtons>  
         </apex:pageBlock>
     </apex:form>
-  
-    <apex:pageBlock title="Search related contacts">
-        <apex:form>
+
+    <apex:form>
+        <apex:pageBlock title="Search related contacts">
             <apex:inputText value="{!searchKey}" label="Input"/>
             <apex:commandButton value="Search" action="{!search}"/>
-        </apex:form>
-    </apex:pageBlock>
+       </apex:pageBlock>
+    </apex:form>
         
     <apex:pageBlock title="Related Contacts" id="relatedContacts">
         <apex:pageBlockButtons location="top" >
