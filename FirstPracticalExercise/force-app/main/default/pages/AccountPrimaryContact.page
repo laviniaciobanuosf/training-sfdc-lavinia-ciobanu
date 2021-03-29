@@ -58,8 +58,10 @@
                 </apex:pageBlockTable>       
             </apex:outputPanel>  
         </apex:pageBlock>
+        <!--
         <apex:pageBlock>
             <apex:facet name="footer"> Page {!pageNumber} of {!totalPages}
             </apex:facet> 
         </apex:pageBlock>
+        -->
 </apex:page>
