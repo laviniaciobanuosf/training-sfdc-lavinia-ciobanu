@@ -2,7 +2,7 @@ public class updatePrimaryContactPhone implements Database.Batchable<SObject>, D
 	public Contact primaryContact;
 	private String primaryContactPhone;
 	private Id accountId;
-	//Get the primary contact and set to the state object
+
 	public updatePrimaryContactPhone(Id accountId) {
 		this.accountId = accountId;
 		List<Contact> primaryContacts = [SELECT Id, Phone, AccountId
@@ -24,7 +24,7 @@ public class updatePrimaryContactPhone implements Database.Batchable<SObject>, D
 			primaryContactPhone = primaryContacts[0].Phone;
 		}
 	
-		return Database.getQueryLocator('SELECT IS FROM Contact ' + 
+		return Database.getQueryLocator('SELECT Id FROM Contact ' + 
 										'WHERE AccountId = \'' + PrimaryContact.AccountId + '\' AND Id != \'' + PrimaryContact.Id + '\'');					
 	}
 
