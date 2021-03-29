@@ -1,5 +1,9 @@
 <apex:page sidebar="false" standardController="Account" extensions="searchController">
     <apex:form >
+    <apex:actionFunction action="{!setPrimaryContact}" name="setAsPrimary" reRender="myPanel">
+                            <apex:param name="selectedId" value="" assignTo="{!primaryId}" />
+                        </apex:actionFunction>
+                    </apex:form>
     <apex:pageBlock title="Account Primary Contact" mode="edit">
         <apex:pageBlockSection columns="2">
             <apex:inputField label="Account Name" value="{!Account.Name}"/>
@@ -16,6 +20,10 @@
     </apex:pageBlock>
   
         <apex:pageBlock title="Search related contacts">
+                <apex:actionFunction action="{!setAsPrimary}" name="setAsPrimary" reRender="myPanel">
+                            <apex:param name="selectedId" value="" assignTo="{!primaryId}" />
+                </apex:actionFunction>
+
             <apex:inputText value="{!searchKey}" label="Input"/>
         	<apex:commandButton value="Search" action="{!search}"/>
         </apex:pageBlock>
@@ -26,17 +34,9 @@
                 <apex:column headerValue="Title" value="{!c.Title}"/>
                 <apex:column headerValue="Phone" value="{!c.Phone}"/>
                 <apex:column headerValue="Is Primary Contact" value="{!c.Is_Primary_Contact__c}"/>
-                <apex:column >
-                 <!--
-                    <apex:commandLink action="{!SetPrimaryContact}" onclick="return confirm('Are you sure you want to set this contact as primary?');" value="Set as Primary" oncomplete="primaryContact('{!Contact_Id}');" reRender="pageid"/>
-                  -->  
-					<apex:commandLink rendered="{!c.Is_Primary_Contact__c == false}" onclick="return confirm('Are you sure you want to set this contact as primary?');" action="{!setPrimaryContact}" value="Set as Primary" rerender="contacts_list">
-                    	<apex:param name="newPrimaryContactId" value="{!c.Id}" assignTo="{!newPrimaryContactId}"/>
-                    </apex:commandLink>
-                
-<!--
-					<apex:actionFunction name='SetContactAsPrimary' action="{!setPrimary}" oncomplete=""/>
- -->		
+                <apex:column title = "Action">
+                <apex: outpulLink rendered="{!IF(c.Is_Primary_Contact__c == false, true, false)}" onclick="if(confirm('Are you sure you want to set this contact as primary?')) {setPrimaryContact('{c.Id}'); return false;}">Set as Primary</apex:outpulLink> 
+            
 				</apex:column>   
             </apex:pageBlockTable>    
         </apex:pageBlock>

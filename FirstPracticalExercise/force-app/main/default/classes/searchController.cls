@@ -1,9 +1,21 @@
 public with sharing class searchController {
-    
-    public List<Contact> ct { get; set;}
-    public String searchKey {get;set;}
-    public Contact c {get;set;}
-    public Account a {get;set;}
+
+    private Account a;
+    private List<Contact> contactsList {get;set;};
+    private Id primaryId;
+    private String accountId = ApexPages.currentPage().getParameters().get('a');
+    private Boolean refreshPage {get; set;} 
+   // private List<Contact> ct { get; set;}
+    private String searchKey {get;set;}
+    private Contact c {get;set;}
+
+    public Id getPrimaryId() {
+        return primaryId;
+    }
+      
+    public void setPrimaryId(Id primaryId) {
+        this.primaryId = primaryId;
+    }
 
     private ApexPages.StandardController stdCtrl {get; set;}
 
@@ -16,38 +28,14 @@ public with sharing class searchController {
     
     public void search() {
         String searchQuery = 'SELECT Name, Title, Phone, Is_Primary_Contact__c FROM Contact WHERE Name Like \'%'+searchKey+'%\' Limit 50';
-        ct = Database.query(searchQuery);
+        contactsList = Database.query(searchQuery);
     } 
    
-  //  public void setAsPrimary(){
-  //      
-  //      for (Contact c : ct) {
-  //          if (c.Is_Primary_Contact__c == false){
-  //          
-  //              c.Is_Primary_Contact__c = true;
-  //    		 }   
-  // 		}    
-  //  }
-   
-    public Contact cc {get;set;}
+ //   public Contact cc {get;set;}
        
-    public Id newPrimaryContactId {get;set;}
+  //  public Id newPrimaryContactId {get;set;}
   
-    public PageReference SetPrimary() {
-       // Id accountId = ApexPages.currentPage().getParameters().get('newPrimaryContactId');
-       // System.debug('The value in contactId: ' + newPrimaryContactId);
-       // c = [SELECT Id, Is_Primary_Contact__c FROM Contact WHERE Id =:newPrimaryContactId];
-        newPrimaryContactId = System.currentPageReference().getParameters().get('newPrimaryContactId');
-        List<Contact> contactToSetPrimary = [SELECT Id, Is_Primary_Contact__c FROM Contact WHERE Id =:'newPrimaryContactId'];
-        System.debug('newPrimaryContactId');
-        for(Contact ctt: contactToSetPrimary){
-            if(ctt.Is_Primary_Contact__c == FALSE){
-                ctt.Is_Primary_Contact__c = TRUE;
-            }
-        }
-        update contactToSetPrimary;
-        return null;  
-    }
+
 
     public PageReference setPrimaryContact() {
         refreshPage = false;
@@ -62,6 +50,7 @@ public with sharing class searchController {
             update c;
             
             refreshPage=true;
+            return null;
         
     }
 }
