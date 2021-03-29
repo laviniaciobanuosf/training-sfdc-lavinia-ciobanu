@@ -48,10 +48,6 @@ private class searchControllerTest {
         Integer pageNumber = controller.getPageNumber();
         System.assertEquals(1, pageNumber);
 
-        //total page count test
-        Integer totalPages = controller.getTotalPages();
-        System.assertEquals(3, totalPages);
-
         controller.Next();
         pageNumber = controller.getPageNumber();
         System.assertEquals(2, pageNumber);
