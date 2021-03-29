@@ -6,7 +6,7 @@ public with sharing class searchController {
     private String accountId = ApexPages.currentPage().getParameters().get('a');
     private Boolean refreshPage {get;set;} 
     public List<Contact> ct {get;set;}
-    public String searchKey {get;set;}
+    private String searchKey = '';
     private Contact c {get;set;}
     private Integer counter=0;
     private Integer listSize = 20;
@@ -21,7 +21,17 @@ public with sharing class searchController {
         this.primaryId = primaryId;
     }
 
-    private ApexPages.StandardController stdCtrl {get; set;}
+    public Account getAccount() {
+        return a;
+    }
+
+    public String getSearchKey() {
+        return searchKey;
+    }
+
+    public void setSearchKey(String searchKey) {
+        this.searchKey = searchKey;
+    }
 
     public searchController(ApexPages.StandardController sc) {
         this.sc=sc;
@@ -40,11 +50,26 @@ public with sharing class searchController {
       //   a = (Account)controller.getRecord();  
 
     }
-    
-    public void search() {
-        String searchQuery = 'SELECT Name, Title, Phone, Is_Primary_Contact__c FROM Contact WHERE Name Like \'%' + searchKey + '%\'';
-        ct = Database.query(searchQuery);
-    } 
+
+    public List<Contact> getContacts() {
+        try {
+            String searchTerm = '%' + searchKey + '%';
+            contactsList = [SELECT Id, Name, Title, Phone, Is_Primary_Contact__c
+                        FROM Contact 
+                        WHERE AccountId = :accountId
+                        AND Name like :searchTerm
+                        ORDER BY Id 
+                        LIMIT :listSize 
+                        OFFSET :counter];
+        	refreshPage=true;
+            return contactsList;
+            
+        } catch (QueryException e) {
+            System.debug('Exception' + e);
+            ApexPages.addMessages(e);   
+            return null;
+        }
+    }
 
     public PageReference setAsPrimary() {
         refreshPage = false;
@@ -66,13 +91,32 @@ public with sharing class searchController {
             return null;      
     }
 
+    public void save() {
+        try {
+            update a;
+        } catch(DmlException e) {
+            System.debug('Exception' + e);
+            ApexPages.addMessages(e);
+        }
+    }
+
+    public void cancel() {
+        try {
+            a = [SELECT id, Name, Phone, Fax, Type, AccountNumber, Active__c
+                    FROM Account
+                    WHERE id = :accountId];
+        } catch (Exception e){
+            System.debug('Exception' + e);
+        }
+    }   
+
     public PageReference Previous() { 
         counter -= listSize;
         refreshPage=true;
         return null;
     }
 
-    public PageReference Next() { //user clicked next button
+    public PageReference Next() { 
         counter += listSize;
         refreshPage=true;
         return null;
@@ -84,7 +128,7 @@ public with sharing class searchController {
         return null;
     }
 
-    public PageReference End() { //user clicked end
+    public PageReference End() { 
         counter = totalSize - listSize;
         refreshPage=true;
         return null;
@@ -95,7 +139,11 @@ public with sharing class searchController {
     }
 
     public Integer getTotalPages() {
-        return totalSize/listSize;     
+        if (math.mod(totalSize, listSize) > 0) {
+            return totalSize/listSize + 1;
+        } else {
+            return (totalSize/listSize);
+        }    
     }
 
     public Boolean getDisablePrevious() { 

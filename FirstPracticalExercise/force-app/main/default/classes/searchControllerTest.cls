@@ -1,6 +1,5 @@
 @isTest
 private class searchControllerTest {
-
     static testmethod void testPageController() {
         Account acc = new Account();
         acc.Name='Test Account';
@@ -33,18 +32,16 @@ private class searchControllerTest {
         ApexPages.StandardController sc = new ApexPages.StandardController(acc);
 
         Test.setCurrentPageReference(new PageReference('Page.myPage')); 
-        System.currentPageReference().getParameters().put('account', acc.Id);
+        System.currentPageReference().getParameters().put('a', acc.Id);
         
         searchController controller = new searchController(sc);
 
-        //set primary contact test
         controller.setPrimaryId(contactsList[0].Id);
         controller.setAsPrimary();
         List<Contact> primaryContacts = [SELECT Id, FirstName FROM Contact WHERE Is_Primary_Contact__c = true and AccountId = :acc.Id];
         System.assertEquals(1, primaryContacts.size());
-        System.assertEquals('Primary', primaryContacts[0].FirstName);
+        System.assertEquals('FirstName', primaryContacts[0].FirstName);
 
-        //page number test
         Integer pageNumber = controller.getPageNumber();
         System.assertEquals(1, pageNumber);
 
@@ -52,11 +49,13 @@ private class searchControllerTest {
         pageNumber = controller.getPageNumber();
         System.assertEquals(2, pageNumber);
 
+        Integer totalPages = controller.getTotalPages();
+        System.assertEquals(3, totalPages);
+
         controller.End();
         pageNumber = controller.getPageNumber();
         System.assertEquals(2, pageNumber);
 
-        //disable next test
         Boolean disableNext = controller.getDisableNext();
         System.assertEquals(true, disableNext);
 
@@ -68,9 +67,20 @@ private class searchControllerTest {
         pageNumber = controller.getPageNumber();
         System.assertEquals(1, pageNumber);
 
-        //disable previous test
         Boolean disablePrev = controller.getDisablePrevious();
         System.assertEquals(true, disablePrev);
+
+        controller.setSearchKey('Primary');
+        List<Contact> filteredContacts = controller.getContacts();
+        System.assertEquals(1, filteredContacts.size());
+
+        Boolean refreshPage = controller.getRefreshPage();
+        System.assertEquals(true, refreshPage);
+
+        Account a1 = controller.getAccount();
+        controller.cancel();
+        Account a2 = controller.getAccount();
+        System.assertEquals(a1, a2);
 
         Test.stopTest();
     }
