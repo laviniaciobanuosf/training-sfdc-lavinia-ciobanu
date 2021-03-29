@@ -4,9 +4,9 @@ public with sharing class searchController {
     private List<Contact> contactsList;
     private Id primaryId;
     private String accountId = ApexPages.currentPage().getParameters().get('a');
-    private Boolean refreshPage {get; set;} 
-   // private List<Contact> ct { get; set;}
-    private String searchKey {get;set;}
+    private Boolean refreshPage {get;set;} 
+    public List<Contact> ct {get;set;}
+    public String searchKey {get;set;}
     private Contact c {get;set;}
 
     public Id getPrimaryId() {
@@ -25,8 +25,8 @@ public with sharing class searchController {
     }
     
     public void search() {
-        String searchQuery = 'SELECT Name, Title, Phone, Is_Primary_Contact__c FROM Contact WHERE Name Like \'%'+searchKey+'%\' Limit 50';
-        contactsList = Database.query(searchQuery);
+        String searchQuery = 'SELECT Name, Title, Phone, Is_Primary_Contact__c FROM Contact WHERE Name Like \'%' + searchKey + '%\' Limit 50';
+        ct = Database.query(searchQuery);
     } 
 
     public PageReference setAsPrimary() {

@@ -16,15 +16,14 @@
     </apex:pageBlock>
   
         <apex:pageBlock title="Search related contacts">
-                <apex:actionFunction action="{!setAsPrimary}" name="setAsPrimary" reRender="myPanel">
-                            <apex:param name="selectedId" value="" assignTo="{!primaryId}" />
-                </apex:actionFunction>
-
             <apex:inputText value="{!searchKey}" label="Input"/>
         	<apex:commandButton value="Search" action="{!search}"/>
         </apex:pageBlock>
         
         <apex:pageBlock title="Related Contacts" id="contacts_list">
+            <apex:actionFunction action="{!setAsPrimary}" name="setAsPrimary" reRender="myPanel">
+                            <apex:param name="selectedId" value="" assignTo="{!primaryId}" />
+            </apex:actionFunction>
             <apex:pageBlockTable value="{!ct}" var="c">  
                 <apex:column headerValue="Name" value="{!c.Name}"/>
                 <apex:column headerValue="Title" value="{!c.Title}"/>
