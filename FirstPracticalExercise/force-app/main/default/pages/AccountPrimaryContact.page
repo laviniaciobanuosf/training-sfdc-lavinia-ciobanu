@@ -1,59 +1,63 @@
 <apex:page sidebar="false" standardController="Account" extensions="searchController"> 
-    <apex:form>
-        <apex:pageBlock title="Account Primary Contact" mode="edit">
-            <apex:pageBlockSection columns="2">
-                <apex:inputField label="Account Name" value="{!Account.Name}"/>
-                <apex:inputField label="Account Number" value="{!Account.AccountNumber}"/>
-                <apex:inputField label="Type" value="{!Account.Type}"/>
-                <apex:inputField label="Active" value="{!Account.Active__c}"/>
-                <apex:inputField label="Phone" value="{!Account.Phone}"/> 
-                <apex:inputField label="Fax" value="{!Account.Fax}"/>
-            </apex:pageBlockSection>
-            <apex:pageBlockButtons >
-            <apex:commandButton action="{!save}" value="Save"/>
-            <apex:commandButton action="{!cancel}" value="Cancel"/>
-            </apex:pageBlockButtons>  
-        </apex:pageBlock>
-    </apex:form>
-  
-    <apex:pageBlock title="Search related contacts">
-        <apex:form>
-            <apex:inputText value="{!searchKey}" label="Input"/>
-            <apex:commandButton value="Search" action="{!search}"/>
-        </apex:form>
-    </apex:pageBlock>
+    <apex:define name="body">
+        <apex:outputPanel id="userDetail">
+            <apex:form>
+                <apex:pageBlock title="Account Primary Contact" mode="edit">
+                    <apex:pageBlockSection columns="2">
+                        <apex:inputField label="Account Name" value="{!Account.Name}"/>
+                        <apex:inputField label="Account Number" value="{!Account.AccountNumber}"/>
+                        <apex:inputField label="Type" value="{!Account.Type}"/>
+                        <apex:inputField label="Active" value="{!Account.Active__c}"/>
+                        <apex:inputField label="Phone" value="{!Account.Phone}"/> 
+                        <apex:inputField label="Fax" value="{!Account.Fax}"/>
+                    </apex:pageBlockSection>
+                    <apex:pageBlockButtons>
+                    <apex:commandButton action="{!save}" value="Save" rendered="userDetail"/>
+                    <apex:commandButton action="{!cancel}" value="Cancel" rendered="userDetail"/>
+                    </apex:pageBlockButtons>  
+                </apex:pageBlock>
+            </apex:form>
         
-    <apex:pageBlock title="Related Contacts" id="relatedContacts">
-        <apex:pageBlockButtons location="top" >
-            <apex:outputPanel id="myButtons" rendered="{!refreshPage}">
-                <apex:form >
-                    <apex:commandButton action="{!Beginning}" title="Beginning" value="<<" disabled="{!disablePrevious}" reRender="myPanel,myButtons"/>
-                    <apex:commandButton action="{!Previous}" title="Previous" value="<" disabled="{!disablePrevious}" reRender="myPanel,myButtons"/>        
-                    <apex:commandButton action="{!Next}" title="Next" value=">" disabled="{!disableNext}" reRender="myPanel,myButtons"/>                        
-                    <apex:commandButton action="{!End}" title="End" value=">>" disabled="{!disableNext}" reRender="myPanel,myButtons"/>        
+            <apex:pageBlock title="Search related contacts">
+                <apex:form>
+                    <apex:inputText value="{!searchKey}" label="Input"/>
+                    <apex:commandButton value="Search" action="{!search}"/>
                 </apex:form>
-            </apex:outputPanel>
-        </apex:pageBlockButtons>
+            </apex:pageBlock>
+                
+            <apex:pageBlock title="Related Contacts" id="relatedContacts">
+                <apex:pageBlockButtons location="top" >
+                    <apex:outputPanel id="myButtons" rendered="{!refreshPage}">
+                        <apex:form >
+                            <apex:commandButton action="{!Beginning}" title="Beginning" value="<<" disabled="{!disablePrevious}" reRender="myPanel,myButtons"/>
+                            <apex:commandButton action="{!Previous}" title="Previous" value="<" disabled="{!disablePrevious}" reRender="myPanel,myButtons"/>        
+                            <apex:commandButton action="{!Next}" title="Next" value=">" disabled="{!disableNext}" reRender="myPanel,myButtons"/>                        
+                            <apex:commandButton action="{!End}" title="End" value=">>" disabled="{!disableNext}" reRender="myPanel,myButtons"/>        
+                        </apex:form>
+                    </apex:outputPanel>
+                </apex:pageBlockButtons>
 
-    <apex:outputPanel id="myPanel">
-        <apex:form>
-            <apex:actionFunction action="{!setAsPrimary}" name="setAsPrimary" reRender="myPanel">
-                <apex:param name="selectedId" value="" assignTo="{!primaryId}" />
-            </apex:actionFunction>
-        </apex:form>
-        <apex:pageBlockTable value="{!ct}" var="c" rendered="{!refreshPage}">  
-            <apex:column headerValue="Name" value="{!c.Name}">
-                <apex:facet name="footer"> {!pageNumber} of {!totalPages}
-                </apex:facet>
-            </apex:column>
-            <apex:column headerValue="Title" value="{!c.Title}"/>
-            <apex:column headerValue="Phone" value="{!c.Phone}"/>
-            <apex:column headerValue="Is Primary Contact" value="{!c.Is_Primary_Contact__c}"/>
-            <apex:column title="Action">
-                <apex:outputLink rendered="{!IF(c.Is_Primary_Contact__c == false, true, false)}" onclick="if(confirm('Are you sure you want to set this contact as primary?')) {setAsPrimary('{!c.Id}'); return false;}">Set as Primary
-                </apex:outputLink> 
-			</apex:column>   
-        </apex:pageBlockTable>  
-    </apex:outputPanel>  
-    </apex:pageBlock>
+            <apex:outputPanel id="myPanel">
+                <apex:form>
+                    <apex:actionFunction action="{!setAsPrimary}" name="setAsPrimary" reRender="myPanel">
+                        <apex:param name="selectedId" value="" assignTo="{!primaryId}" />
+                    </apex:actionFunction>
+                </apex:form>
+                <apex:pageBlockTable value="{!ct}" var="c" rendered="{!refreshPage}">  
+                    <apex:column headerValue="Name" value="{!c.Name}">
+                        <apex:facet name="footer"> {!pageNumber} of {!totalPages}
+                        </apex:facet>
+                    </apex:column>
+                    <apex:column headerValue="Title" value="{!c.Title}"/>
+                    <apex:column headerValue="Phone" value="{!c.Phone}"/>
+                    <apex:column headerValue="Is Primary Contact" value="{!c.Is_Primary_Contact__c}"/>
+                    <apex:column title="Action">
+                        <apex:outputLink rendered="{!IF(c.Is_Primary_Contact__c == false, true, false)}" onclick="if(confirm('Are you sure you want to set this contact as primary?')) {setAsPrimary('{!c.Id}'); return false;}">Set as Primary
+                        </apex:outputLink> 
+                    </apex:column>   
+                </apex:pageBlockTable>  
+            </apex:outputPanel>  
+            </apex:pageBlock>
+        </apex:outputPanel>
+    </apex:define>
 </apex:page>
