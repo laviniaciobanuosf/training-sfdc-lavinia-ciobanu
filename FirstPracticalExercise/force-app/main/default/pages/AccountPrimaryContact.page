@@ -29,8 +29,8 @@
                 <apex:column headerValue="Title" value="{!c.Title}"/>
                 <apex:column headerValue="Phone" value="{!c.Phone}"/>
                 <apex:column headerValue="Is Primary Contact" value="{!c.Is_Primary_Contact__c}"/>
-                <apex:column>
-                <apex:outputLink rendered="{!IF(c.Is_Primary_Contact__c == false, true, false)}" onclick="if(confirm('Are you sure you want to set this contact as primary?')) {setAsPrimary('{c.Id}'); return false;}">Set as Primary</apex:outputLink> 
+                <apex:column title="Action">
+                <apex:outputLink rendered="{!IF(c.Is_Primary_Contact__c == false, true, false)}" onclick="if(confirm('Are you sure you want to set this contact as primary?')) {setAsPrimary('{!c.Id}'); return false;}">Set as Primary</apex:outputLink> 
 				</apex:column>   
             </apex:pageBlockTable>    
         </apex:pageBlock>
