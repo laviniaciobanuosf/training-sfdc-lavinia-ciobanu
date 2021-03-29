@@ -19,7 +19,6 @@
     <apex:pageBlock title="Search related contacts">
         <apex:form>
             <apex:inputText value="{!searchKey}" label="Input"/>
-            <apex:commandButton value="Search" action="{!search}"/>
             <apex:commandButton reRender="myPanel,myButtons" value="Search"/>
         </apex:form>
     </apex:pageBlock>
