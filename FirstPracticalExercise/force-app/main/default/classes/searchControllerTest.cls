@@ -14,7 +14,7 @@ private class searchControllerTest {
         insert primaryContact;
 
         List<Contact> contactsList = new List<Contact>();
-        for(Integer i = 0; i < 49; i++) {
+        for(Integer i = 0; i < 50; i++) {
             Contact c = new Contact();
             c.AccountId = acc.Id;
             c.FirstName = 'FirstName'; 
