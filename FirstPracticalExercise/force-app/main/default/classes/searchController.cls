@@ -52,7 +52,7 @@ public with sharing class searchController {
     }
     
     public void search() {
-        String searchQuery = 'SELECT Name, Title, Phone, Is_Primary_Contact__c FROM Contact WHERE Name Like \'%' + searchKey + '%\'';
+        String searchQuery = 'SELECT Name, Title, Phone, Is_Primary_Contact__c FROM Contact WHERE Name Like \'%' + searchKey + '%\' LIMIT 200';
         ct = Database.query(searchQuery);
     } 
 
