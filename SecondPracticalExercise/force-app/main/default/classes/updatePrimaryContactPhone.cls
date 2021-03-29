@@ -1,7 +1,10 @@
 public class updatePrimaryContactPhone implements Database.Batchable<SObject>, Database.Stateful {
 	public Contact primaryContact;
+	private String primaryContactPhone;
+	private Id accountId;
 	//Get the primary contact and set to the state object
 	public updatePrimaryContactPhone(Id accountId) {
+		this.accountId = accountId;
 		List<Contact> primaryContacts = [SELECT Id, Phone, AccountId
 		                                 FROM Contact
 		                                 WHERE AccountId = :accountId AND Is_Primary_Contact__c = true
@@ -13,14 +16,21 @@ public class updatePrimaryContactPhone implements Database.Batchable<SObject>, D
 
 	
 	public Database.QueryLocator start(Database.BatchableContext bc) {
+		List<Contact> primaryContacts = [SELECT Id, Phone 
+										 FROM Contact 
+										 WHERE AccountId = :accountId 
+										 AND Is_Primary_Contact__c = true LIMIT 1];
+		if (!primaryContacts.isEmpty()) {
+			primaryContactPhone = primaryContacts[0].Phone;
+		}
 		String Query = 'SELECT Id FROM Contact WHERE AccountId = primaryContact.AccountId AND Id != primaryContact.Id';
-		try {
+	//	try {
 				return Database.getQueryLocator(Query);
 				
-		} catch (Exception e) {
-			System.debug('Exception' + e.getMessage());
-			return null;
-		}
+	//	} catch (Exception e) {
+	//		System.debug('Exception' + e.getMessage());
+	//		return null;
+	//	}
 	}
 
 	public void execute(Database.BatchableContext bc, List<Contact> scope) {

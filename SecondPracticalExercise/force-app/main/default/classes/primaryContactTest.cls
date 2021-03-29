@@ -25,7 +25,7 @@ public class primaryContactTest {
 		List<Contact> contactsList = [SELECT Id, Phone
 		                          	  FROM Contact
 		                         	  WHERE FirstName = 'TriggerTest' AND Is_Primary_Contact__c != true
-		                         	  LIMIT 1];
+									  LIMIT 1];
 		Contact contactToUpdate = contactsList[0];
 		contactToUpdate.Is_Primary_Contact__c = true;
 		update contactToUpdate;
@@ -33,7 +33,7 @@ public class primaryContactTest {
 
 		List<Contact> randomContacts = [SELECT Id, Primary_Contact_Phone__c
 		                                FROM Contact
-		                                WHERE FirstName = 'TriggerTest' AND Id != :contactToUpdate.Id and Is_Primary_Contact__c != true
+		                                WHERE FirstName = 'TriggerTest' AND Id != :contactToUpdate.Id AND Is_Primary_Contact__c != true
 		                                LIMIT 1];
 
 		System.assertEquals(contactToUpdate.phone, randomContacts[0].Primary_Contact_Phone__c);
