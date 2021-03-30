@@ -1,67 +1,147 @@
-global inherited sharing class OpportunityAmounts implements Database.Batchable <SObject>, Database.Stateful {
-    private Map<Id,String> primaryAccountEmailMap;
-    private List<AggregateResult> result;
-    global OpportunityAmounts(Map<Id,String> primaryAccountEmailMap, List<AggregateResult> result) {
-        this.primaryAccountEmailMap = primaryAccountEmailMap;
-        this.result = result;
-    }
+global class OpportunityAmounts implements Database.Batchable<SObject>, Database.Stateful {
+	
+	String style = '<style>table{border-collapse:collapse;width:100%; border:2px solid #ddd;text-align:left;padding:8px}th{border:1px solid #fff; text-aling:center;padding:8px;background-color:#ddd}h4{font-weight:300}</style>';
+	Map<Id, ContactAccountInfo> accountPrimaryContactMap;
+	Map<Id, List<CustomOpportunity>> opportunitiesByAccountId;
+	public List<Account> start(Database.BatchableContext bc){
+		try{
+			
+			List<Account> accountsWithPrimaryContacts = [Select Id, Name, (Select Email
+			                                                               From Contacts
+			                                                               Where Is_Primary_Contact__c = true
+			                                                               Limit 1)
+			                                             From Account 
+			                                             Where Id IN (Select AccountId
+			                                                          From Contact
+			                                                          Where Is_Primary_Contact__c = true and Email != null)];
+		
+			accountPrimaryContactMap = new Map<Id, ContactAccountInfo>();
+			for (Account account : accountsWithPrimaryContacts){
+				ContactAccountInfo contactItem = new ContactAccountInfo();
+				contactItem.AccountName = account.Name;
+				contactItem.Email = account.Contacts[0].Email;
+				AccountPrimaryContactMap.put(account.Id, contactItem);
+			}
 
-    global Iterable<SObject> start(Database.BatchableContext bc) {
-        return result;
-    }
-    
-    global void execute(Database.BatchableContext bc, List<SObject> scope) {
+			GetOpportunities();
 
-        System.debug('records size: ' + scope.size());
-        Map<Id,String> mailContents = getMailContents(scope);
-        List<Messaging.SingleEmailMessage> mails = getMails(mailContents);
+			return accountsWithPrimaryContacts;
+		} catch (Exception e){
+			System.debug('Exception ' + e.getMessage());
+			return null;
+		}
+	}
 
-        Messaging.sendEmail(mails);
-    }
+	public void GetOpportunities(){
+		try{
+			
+			Date lastModifiedFilter = Date.today().addMonths(-1);
 
-    private Map<Id,String> getMailContents(List<SObject> scope) {
-        Map<Id,String> mailContents = new Map<Id,String>();
-        for (SObject s: scope) {
-            AggregateResult ar = (AggregateResult)s;
-            Id accountId = (Id)ar.get('AccountId');
-            String accountName = (String)ar.get('AccountName');
-            String stageName = (String)ar.get('StageName');
-            String sumOfOpportunityAmount = (String)ar.get('SumOfOpportunityAmount');
+			List<AggregateResult> opportunitiesResult = [Select AccountId, Account.Name AccountName, StageName, Format(Sum(Amount))AmountSum
+			                                             From Opportunity
+			                                             Where AccountId IN :accountPrimaryContactMap.keySet() and (CreatedDate >= :lastModifiedFilter OR LastModifiedDate >= :lastModifiedFilter)
+			                                             Group By AccountId, Account.Name, StageName
+			                                             Order By StageName desc];
 
-            String body = mailContents.get(accountId);
-            if(String.isBlank(body)) {
-                body = '<table border="1" style="border-collapse: collapse"><tr><th>Account</th><th>Stage</th><th>Amount</th></tr>';
-            }
+			if (opportunitiesResult != null && !opportunitiesResult.isEmpty()){
+				opportunitiesByAccountId = new Map<Id, List<CustomOpportunity>>();
+			
+				for (AggregateResult result : opportunitiesResult){
+					Id key = (Id)result.get('AccountId');
+					if (!opportunitiesByAccountId.containsKey(key)){
+						opportunitiesByAccountId.put(key, new List<CustomOpportunity>());
+					}
+					CustomOpportunity value = new CustomOpportunity();            
+					value.StageName = (String)result.get('StageName');
+					value.AmountSum = (String)result.get('AmountSum');              
+					opportunitiesByAccountId.get(key).add(value);
+				}
+			}
+		} catch (Exception e){
+			System.debug('Exception ' + e.getMessage());
+		}
+	}
 
-            body += '<tr><td>' + accountName + '</td><td>' + stageName + '</td><td>' + sumOfOpportunityAmount + '</td></tr>';
-            mailContents.put(accountId, body);
-        }
-        return mailContents;
-    }
+	public void execute(Database.BatchableContext bc, List<Account> scope){
+		try{
+			List<Messaging.SingleEmailMessage> mailList = new List<Messaging.SingleEmailMessage>();
+			if (opportunitiesByAccountId != null && !opportunitiesByAccountId.isEmpty()){
+				
+				for (Id key : opportunitiesByAccountId.keySet()){
+					ContactAccountInfo primaryContact = accountPrimaryContactMap.get(key);
+					List<CustomOpportunity> opportunities = opportunitiesByAccountId.get(key);
+	
+					Messaging.SingleEmailMessage mail = getEmail(primaryContact, opportunities);
+					if (mail != null)
+						mailList.Add(mail);
+				}
+				if (mailList.size() > 0){
+					Messaging.sendEmail(mailList);
+				}
+			}
+		} catch (Exception e){
+			System.debug('Exception ' + e.getMessage());
+		}
+	}
 
-    private List<Messaging.SingleEmailMessage> getMails(Map<Id,String> mailContents) {
-        List<Messaging.SingleEmailMessage> mails = new List<Messaging.SingleEmailMessage>();
-        for (Id accountId : mailContents.keySet()) {
-            String mailCon = mailContents.get(accountId);
-            mailCon += '</table>';
-            Messaging.SingleEmailMessage message = new Messaging.SingleEmailMessage();
-            message.setToAddresses(new List<String>{primaryAccountEmailMap.get(accountId)});
-            message.setSubject('Sum of Opportunity Amount');
-            message.setHtmlBody(mailCon);
-            mails.add(message);
-        }
-        return mails;
-    }
+	public void finish(Database.BatchableContext bc){
 
-    global void finish(Database.BatchableContext bc) {
-        try {
-            AsyncApexJob async = [SELECT Id, Status, NumberOfErrors, JobItemsProcessed, TotalJobItems, CreatedBy.Email
-                                  FROM AsyncApexJob
-                                  WHERE Id = :bc.getJobId()];
+	}
 
-            System.debug('*******' + async.Id);
-        } catch (Exception e) {
-            System.debug('Exception' + e.getMessage());
-        }
-    }
+	public Messaging.SingleEmailMessage getEmail(ContactAccountInfo primaryContact, List<CustomOpportunity> opportunities){
+		try{
+			Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+			mail.setSubject('Opportunities related to ' + primaryContact.AccountName);
+			List<String> emailAddresses = new List<String>();
+			emailAddresses.Add(primaryContact.Email);
+			mail.setToAddresses(emailAddresses);
+			String oppSection = '';
+
+			if (opportunities != null && opportunities.size() > 0){
+				String rows = '';
+				Set<String> stages = new Set<String>{'Closed Won', 'Closed Lost'};
+				//stages Set will be used to check if all stages are existing, if not, it will add missing stages to the table.
+				for (CustomOpportunity item : opportunities) {
+                    Double sumOfOpen = 0;
+					stages.remove(item.StageName);
+					String row = '<tr><td>' + primaryContact.AccountName + '</td><td>' + item.StageName + '</td><td> ' + item.AmountSum + '</td></tr>';
+					rows += row;
+                    if (item.StageName != 'Closed Won' && item.StageName != 'Closed Lost') {
+                        sumOfOpen +=  Double.valueOf(item.AmountSum);       
+                    }
+                    row = '<tr><td>' + primaryContact.AccountName + '</td><td>' + 'Open' + '</td><td> ' + sumOfOpen + '</td></tr>';
+                    rows += row;
+                }
+				if (!stages.isEmpty()){
+					//missing stages inserting to the table
+					for (String item : stages){
+						String row = '<tr><td>' + primaryContact.AccountName + '</td><td>' + item + '</td><td></td></tr>';
+						rows += row;
+					}
+				}
+               
+				oppSection = '<table><tr><th>Account</th><th>Stage</th><th>Amount</th> ' + rows + '</tr></table>';
+			} else{
+				oppSection = '<p>Your account does not have any opportunities in Open, Closed Won, Closed Lost stages.</p>';
+			}
+
+			String htmlBody = '<html><head>' + style + '</head><body><h4>Below is a table of opportunities related to the account: ' + primaryContact.AccountName + ' </h4><br/>' + oppSection + '</body>';
+
+			mail.setHtmlBody(htmlBody);
+			return mail;
+		} catch (Exception e){
+			System.debug('Exception ' + e.getMessage());
+			return null;
+		}
+	}
+
+	public class ContactAccountInfo{
+		public String AccountName{ get;set;}
+		public String Email{ get;set;}
+	}
+
+	public class CustomOpportunity{
+		public String StageName{ get;set;}
+		public String AmountSum{ get;set;}
+	}
 }
