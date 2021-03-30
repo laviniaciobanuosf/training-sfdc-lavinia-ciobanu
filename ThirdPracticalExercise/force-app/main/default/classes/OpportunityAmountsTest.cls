@@ -3,8 +3,6 @@ public class OpportunityAmountsTest {
     @testSetup
     static void setup() {
         
-        List<Opportunity> opportunities = new List<Opportunity>();
-        
         Account a = new Account();
         a.Name = 'Test Account';
         insert a;
@@ -17,10 +15,10 @@ public class OpportunityAmountsTest {
         c.Is_Primary_Contact__c = true;
         insert c;
 
-        List<Opportunity> opptys = new List<Opportunity>();
+        List<Opportunity> oppList = new List<Opportunity>();
         Date closeDate = Date.today().addDays(-7);
 
-        for(Integer i=0; i<10; i++) {
+        for (Integer i=0; i<10; i++) {
             Opportunity o = new Opportunity();
             o.AccountId = a.Id;
             o.Name = 'Opportunity' + i;
@@ -28,32 +26,78 @@ public class OpportunityAmountsTest {
             o.StageName = 'Closed Won';
             o.Amount = 1000;
             o.AccountId = a.Id;
-            opptys.add(o);
+            oppList.add(o);
         }
-        insert opptys;    
+        insert oppList;    
     }
     
-	@isTest static void test() {
-     
-        Test.startTest();
-        OpportunityAmounts obj = new OpportunityAmounts();
-        Id batchId = Database.executeBatch(obj);
+	@isTest static void test1() {
+        Test.startTest();  
+        ScheduleOpportunityAmounts s = new ScheduleOpportunityAmounts();
+        s.execute(null);
   	    Test.stopTest();
+        
+        List<AsyncApexJob> jobs = [SELECT Id, ApexClassId, ApexClass.Name, Status, JobType
+                                   FROM AsyncApexJob
+                                   WHERE JobType = 'BatchApex'
+                                   AND ApexClass.Name = 'ScheduleOpportunityAmounts'];
+    }
 
-        System.assertEquals(10, [SELECT COUNT() FROM Opportunity WHERE NAME LIKE 'Opportunity %']);
+    @isTest static void test2() {
+        Test.startTest();
+        Integer hourvalue = 12;
+        String CRON_EXP = '0 0 12 30 3 ? 2021';
+        String jobId = System.schedule('oppTest', CRON_EXP, new ScheduleOpportunityAmounts());
 
-     //   System.assertEquals(1, Limits.getEmailInvocations());
+        CronTrigger ct = [SELECT Id, CronExpression, TimesTriggered, NextFireTime
+                          FROM CronTrigger
+                          WHERE Id = :jobId];
 
-   // System.assertEquals(10000, o.amount);
+        Datetime now = Datetime.now();
+        Datetime expected = Datetime.now();
+        Integer hour = Datetime.now().hour();
+        if(hour > hourValue) {
+            Datetime temp = now.addDays(1);
+            expected = Datetime.newInstance(temp.year(), temp.month(), temp.hour(), hourValue, 0, 0);
+        } else {
+            expected = Datetime.newInstance(now.year(), now.month(), now.hour(), hourvalue, 0, 0);
+        }
 
-   // System.assertEquals(acc.Sum_of_Opportunity_Amount__c, o.amount);
+        System.assertEquals(CRON_EXP, ct.CronExpression);
+        System.assertEquals(String.valueOf(expected), String.valueOf(ct.NextFireTime));
+        Test.stopTest();
+    }
 
-  
-  //  System.assertEquals(10, [select count() from Opportunity where Name like 'Test Opportunity %']);
- //   System.assertEquals(10000, sumOfOpportunityAmounts);
-
-   // EmailMessage[] newEmail = new EmailMessage[0];
-   // newEmail.add(new EmailMessage(FromAddress = 'test@abc.org', Incoming = True, ToAddress= 'lavinia.ciobanu@osf.digital', Subject = 'Test email', TextBody = '23456 ')); 
-   // insert newEmail;
+    @isTest static void test3() {
+        String CRON_EXP = '0 0 12 30 3 ? 2021';
+        List<Opportunity> oppList = new List<Opportunity>();
+        Date closeDate = Date.today().addDays(-7);
+        for (Integer i=0; i<10; i++) {
+            Opportunity o = new Opportunity(
+                Name = 'Opportunity ' + i,
+                CloseDate = closeDate,
+                StageName = 'Closed Won'
+            );
+            oppList.add(o);
+        }
+        insert oppList;
+            
+        Map<Id, Opportunity> oppMap = new Map<Id, Opportunity>(oppList);
+        List<Id> opptIds = new List<Id>(oppMap.keySet());
+        Test.startTest();
+           
+        String jobId = System.schedule('ScheduledApexTest', CRON_EXP, new ScheduleOpportunityAmounts());
+           
+        List<Task> lt = [SELECT Id
+                         FROM Task
+                         WHERE WhatId IN :opptIds];
+        System.assertEquals(0, lt.size(), 'Tasks exist before job has run');
+        
+        Test.stopTest();
+           
+        lt = [SELECT Id
+              FROM Task
+              WHERE WhatId IN :opptIds];
+        System.assertEquals(opptIds.size(),lt.size(),'Tasks were not created');
     }
 }
