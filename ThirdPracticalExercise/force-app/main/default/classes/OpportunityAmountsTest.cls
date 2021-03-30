@@ -45,8 +45,8 @@ public class OpportunityAmountsTest {
 
     @isTest static void test2() {
         Test.startTest();
-        Integer hourvalue = 14;
-        String CRON_EXP = '0 0 14 30 3 ? 2021';
+        Integer hourvalue = 17;
+        String CRON_EXP = '0 0 17 30 3 ? 2021';
         String jobId = System.schedule('oppTest', CRON_EXP, new ScheduleOpportunityAmounts());
 
         CronTrigger ct = [SELECT Id, CronExpression, TimesTriggered, NextFireTime
@@ -69,7 +69,7 @@ public class OpportunityAmountsTest {
     }
 
     @isTest static void test3() {
-        String CRON_EXP = '0 0 14 30 3 ? 2021';
+        String CRON_EXP = '0 0 16 30 3 ? 2021';
         List<Opportunity> oppList = new List<Opportunity>();
         Date closeDate = Date.today().addDays(-7);
         for (Integer i=0; i<10; i++) {

@@ -109,12 +109,12 @@ global class OpportunityAmounts implements Database.Batchable<SObject>, Database
 					stages.remove(item.StageName);
 					String row = '<tr><td>' + primaryContact.AccountName + '</td><td>' + item.StageName + '</td><td> ' + item.AmountSum + '</td></tr>';
 					rows += row;
-					Decimal sumOfOpen = 0;
-                    if (item.StageName != 'Closed Won' && item.StageName != 'Closed Lost') {
-                  	  sumOfOpen +=  Decimal.valueOf(item.AmountSum);       
-                    }
-                    row = '<tr><td>' + primaryContact.AccountName + '</td><td>' + 'Open' + '</td><td> ' + sumOfOpen + '</td></tr>';
-                    rows += row;
+				//	Decimal sumOfOpen = 0;
+                //    if (item.StageName != 'Closed Won' && item.StageName != 'Closed Lost') {
+                //  	  sumOfOpen +=  Decimal.valueOf(item.AmountSum);       
+                //    }
+                //    row = '<tr><td>' + primaryContact.AccountName + '</td><td>' + 'Open' + '</td><td> ' + sumOfOpen + '</td></tr>';
+                //    rows += row;
                 }
 				if (!stages.isEmpty()) {
 					for (String item : stages){
