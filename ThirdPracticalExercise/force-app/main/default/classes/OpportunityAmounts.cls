@@ -1,17 +1,18 @@
 global class OpportunityAmounts implements Database.Batchable<SObject>, Database.Stateful {
-	
+
+	String style = '<style>table{border-collapse:collapse;width:100%; border:2px solid #ddd;text-align:left;padding:8px}th{border:1px solid #fff; text-aling:center;padding:8px;background-color:#ddd}h4{font-weight:300}</style>';
 	Map<Id, ContactAccountInfo> accountPrimaryContactMap;
 	Map<Id, List<CustomOpportunity>> opportunitiesByAccountId;
 	
 	public List<Account> start(Database.BatchableContext bc) {
 		try{
 			
-			List<Account> accountsWithPrimaryContacts = [Select Id, Name, (SELECT Email
+			List<Account> accountsWithPrimaryContacts = [SELECT Id, Name, (SELECT Email
 			                                                               FROM Contacts
 			                                                               WHERE Is_Primary_Contact__c = true
 			                                                               LIMIT 1)
-			                                             From Account 
-			                                             Where Id IN (SELECT AccountId
+			                                             FROM Account 
+			                                             WHERE Id IN (SELECT AccountId
 			                                                          FROM Contact
 			                                                          WHERE Is_Primary_Contact__c = true AND Email != null)];
 		
@@ -101,33 +102,43 @@ global class OpportunityAmounts implements Database.Batchable<SObject>, Database
 				String rows = '';
 				Set<String> stages = new Set<String>{'Closed Won', 'Closed Lost'};
 
-			//	Set<String> openStages = new Set<String>{'Prospecting', 'Qualification',
-			//										'Need Analysis', 'Value Proposition', 'Id. Decision Makers', 
-			//										'Perception Analysis', 'Proposal/Price Quote', 'Negotiation/Review'};
+				// Set<String> openStages = new Set<String>{'Prospecting', 'Qualification',
+				// 									'Need Analysis', 'Value Proposition', 'Id. Decision Makers', 
+				// 									'Perception Analysis', 'Proposal/Price Quote', 'Negotiation/Review'};
 		
 				for (CustomOpportunity item : opportunities) {
 					stages.remove(item.StageName);
 					String row = '<tr><td>' + primaryContact.AccountName + '</td><td>' + item.StageName + '</td><td> ' + item.AmountSum + '</td></tr>';
 					rows += row;
-				//	Decimal sumOfOpen = 0;
-                //    if (item.StageName != 'Closed Won' && item.StageName != 'Closed Lost') {
-                //  	  sumOfOpen +=  Decimal.valueOf(item.AmountSum);       
-                //    }
-                //    row = '<tr><td>' + primaryContact.AccountName + '</td><td>' + 'Open' + '</td><td> ' + sumOfOpen + '</td></tr>';
-                //    rows += row;
+					// Decimal sumOfOpen = 0;
+                    // if (item.StageName != 'Closed Won' && item.StageName != 'Closed Lost') {
+                  	//   sumOfOpen +=  Decimal.valueOf(item.AmountSum);       
+                    // }
+                    // row = '<tr><td>' + primaryContact.AccountName + '</td><td>' + 'Open' + '</td><td> ' + sumOfOpen + '</td></tr>';
+                    // rows += row;
                 }
+
+				// Decimal sumOfOpen = 0;
+				// for (CustomOpportunity item : opportunities) {
+				// 	sumOfOpen +=  Decimal.valueOf(item.AmountSum);
+				// 	openStages.remove(item.StageName);
+				// }
+				// String row = '<tr><td>' + primaryContact.AccountName + '</td><td>' + 'Open' + '</td><td> ' + sumOfOpen + '</td></tr>';
+                // rows += row;
+			
+
 				if (!stages.isEmpty()) {
 					for (String item : stages){
 						String row = '<tr><td>' + primaryContact.AccountName + '</td><td>' + item + '</td><td></td></tr>';
 						rows += row;
 					}
-				}
-               
+				}  
 				oppSection = '<table><tr><th>Account</th><th>Stage</th><th>Amount</th> ' + rows + '</tr></table>';
 			} else { 
 				oppSection = '<p>Your account does not have any opportunities in Open, Closed Won, Closed Lost stages.</p>';
 			}
-
+			String htmlBody = '<html><head>' + style + '</head><body><br/>' + oppSection + '</body>';
+			mail.setHtmlBody(htmlBody);
 			return mail;
 		} catch (Exception e) {
 			System.debug('Exception ' + e.getMessage());
