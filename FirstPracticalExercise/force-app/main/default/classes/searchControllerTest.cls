@@ -1,3 +1,10 @@
+/*
+* @author Lavinia Ciobanu
+* @date Apr 6, 2021
+* @name searchControllerTest
+* @description test class for searchController  
+*/
+
 @isTest
 private class searchControllerTest {
     static testmethod void testPageController() {

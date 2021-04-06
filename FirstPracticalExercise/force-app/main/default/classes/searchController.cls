@@ -1,3 +1,10 @@
+/*
+* @author Lavinia Ciobanu
+* @date Apr 6, 2021
+* @name searchController
+* @description controller for AccountPrimaryContact page 
+*/
+
 public with sharing class searchController {
 
     private Account a;
@@ -53,8 +60,12 @@ public with sharing class searchController {
     }
     
     public void search() {
+        try {
         String searchQuery = 'SELECT Name, Title, Phone, Is_Primary_Contact__c FROM Contact WHERE Name Like \'%' + searchKey + '%\' ORDER BY Id LIMIT ' + listSize + 'OFFSET ' + counter;
         ct = Database.query(searchQuery);
+        } catch (Exception e) {
+            System.debug('Exception' + e.getMessage());
+        }
     } 
     
 
@@ -81,15 +92,16 @@ public with sharing class searchController {
     public PageReference setAsPrimary() {
         refreshPage = false;
         try {
-        List<Contact> primaryContacts = [SELECT Id, Is_Primary_Contact__c FROM Contact WHERE AccountId = :accountId AND Is_Primary_Contact__c = true];
+        List<Contact> primaryContacts = [SELECT Id, Is_Primary_Contact__c FROM Contact WHERE AccountId = :accountId AND (Is_Primary_Contact__c = true OR Id = :primaryId)];
             for(Contact primaryContact : primaryContacts) {
-                primaryContact.Is_Primary_Contact__c = false;
+                if (primaryContact.Is_Primary_Contact__c) {
+                 primaryContact.Is_Primary_Contact__c = false; 
+                }  
+                else if (primaryContact.Id == primaryId) {
+                     primaryContact.Is_Primary_Contact__c = true;
+                }    
             }
             update primaryContacts;
-            
-            Contact c = [SELECT Id, Is_Primary_Contact__c FROM Contact WHERE Id = :primaryId];
-            c.Is_Primary_Contact__c = true;
-            update c;
             
             refreshPage = true;
         } catch (Exception e) {
