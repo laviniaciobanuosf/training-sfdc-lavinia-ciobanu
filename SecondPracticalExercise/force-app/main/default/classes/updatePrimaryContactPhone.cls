@@ -1,3 +1,10 @@
+/*
+* @author Lavinia Ciobanu
+* @date Apr 6, 2021
+* @name updatePrimaryContactPhone
+* @description batch class for primary contact phone update
+*/
+
 public class updatePrimaryContactPhone implements Database.Batchable<SObject>, Database.Stateful {
 	public Contact primaryContact;
 	private String primaryContactPhone;

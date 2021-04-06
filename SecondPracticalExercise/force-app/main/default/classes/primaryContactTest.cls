@@ -1,3 +1,10 @@
+/*
+* @author Lavinia Ciobanu
+* @date Apr 6, 2021
+* @name primaryContactTest
+* @description test class for primary contact 
+*/
+
 @isTest
 public class primaryContactTest {
 	@isTest
