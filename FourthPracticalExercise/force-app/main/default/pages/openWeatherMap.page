@@ -1,0 +1,10 @@
+<apex:page standardController="Account" extensions="openWeatherMapAPIController" sidebar="false" showHeader="false">
+    <apex:pageMessages/>
+    <apex:pageBlock title="Weather in {!city}:">
+        <apex:pageBlockSection columns="2">
+            <apex:outputText label="Description:" value="{!description}"/> 
+            <apex:outputText label="Temperature:" value="{!temp}"/>
+            <apex:image url="{!imageURL}"/>
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+</apex:page>
