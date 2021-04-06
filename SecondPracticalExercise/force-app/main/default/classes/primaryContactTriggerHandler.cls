@@ -7,6 +7,14 @@
 
 public with sharing class primaryContactTriggerHandler {
 
+    /*
+    * @author Lavinia Ciobanu
+    * @date Apr 6, 2021
+    * @name onBefore
+    * @description executes before insert-update logic
+    * @param Contact[] newContacts
+    * @return void
+    */
     public void onBefore (Contact[] newContacts) {
         for (Contact c: newContacts) {
             if (c.Is_Primary_Contact__c) {
@@ -26,6 +34,14 @@ public with sharing class primaryContactTriggerHandler {
         }
     }
 
+    /*
+    * @author Lavinia Ciobanu
+    * @date Apr 6, 2021
+    * @name onAfterInsert
+    * @description executes after insert logic 
+    * @param Contact[] newContacts
+    * @return void
+    */
     public void onAfterInsert (Contact[] newContacts) {
         for (Contact c: newContacts) {
             if (c.Is_Primary_Contact__c) {
@@ -34,6 +50,14 @@ public with sharing class primaryContactTriggerHandler {
         }
     }
 
+    /*
+    * @author Lavinia Ciobanu
+    * @date Apr 6, 2021
+    * @name onAfterUpdate
+    * @description executes after update logic 
+    * @param Contact[] newContacts, Contact[] newContacts
+    * @return void
+    */
     public void onAfterUpdate(Contact[] oldContacts, Contact[] newContacts) { 
         for (Integer i=0; i< newContacts.size(); i++) {
             Contact newContact = newContacts[i];
